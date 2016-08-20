@@ -14,9 +14,19 @@ class phony
     return self::$phony;
   }
 
+  private static function __unescape_methodname($name)
+  {
+    if (substr($name, 0, 2) == "__")
+      return substr($name, 2);
+
+    return $name;
+  }
+
   public static function __callStatic($name, $arguments)
   {
-    return call_user_func_array([self::__get_phony()  , $name], $arguments);
+    var_dump("calling $name");
+    $method = self::__unescape_methodname($name);
+    return call_user_func_array([self::__get_phony(), $method], $arguments);
   }
 }
 

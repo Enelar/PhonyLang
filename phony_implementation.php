@@ -24,15 +24,12 @@ class phony_implementation extends phony_extend
 
   public function __Call($name, $arguments)
   {
-    if (!method_exists($this, $name))
+    if (method_exists($this, $name))
     {
       $this->FilterFriends();
       return call_user_func_array([$this, $name], $arguments);
     }
 
-    if (empty($this->extend))
-      $this->extend = new phony_extend();
-
-    return call_user_func_array([$this->extend, $name], $arguments);
+    return parent::__Call($name, $arguments);
   }
 }

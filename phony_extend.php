@@ -7,7 +7,7 @@ class phony_extend
   protected function add($name, $is_public, $fn_command)
   {
     if (!empty($this->methods[$name]))
-      throw Exception("Method already exists. Refuse to override");
+      throw new Exception("Method already exists. Refuse to override");
 
     $this->methods[$name] = $fn_command;
   }
@@ -15,14 +15,14 @@ class phony_extend
   public function __Call($name, $arguments)
   {
     if (empty($this->methods[$name]))
-      throw Exception("phony::{$name} not defined");
+      throw new Exception("phony::{$name} not defined");
 
     $method = $this->methods[$name];
 
     if (is_string($method))
-      return call_user_method_array($method, $arguments);
+      return call_user_func_array($method, $arguments);
 
-    throw Exception("phony_extend support only string method. todo");
+    throw new Exception("phony_extend support only string method. todo");
   }
 
   protected function FilterFriends()

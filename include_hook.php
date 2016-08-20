@@ -74,7 +74,7 @@ phony::add('include_once', true, function ($filename)
 
 phony::add('require', true, function ($filename)
 {
-  $result = phony::include($filename);
+  $result = phony::__include($filename);
 
   if (!$result)
     throw Exception("Unable to require {$filename}");
@@ -82,7 +82,7 @@ phony::add('require', true, function ($filename)
 
 phony::add('require_once', true, function($filename)
 {
-  $result = phony::include_once($filename);
+  $result = phony::__include_once($filename);
 
   if (!$result)
     throw Exception("Unable to require {$filename}");
