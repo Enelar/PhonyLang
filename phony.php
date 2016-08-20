@@ -1,36 +1,6 @@
 <?php namespace phony;
 
-class phony_implementation
-{
-  private $rewrite;
-
-  public function Rewrite($file)
-  {
-    $rewrite = $this->GetRewriteObj();
-
-    return $rewrite->Tranverse($file);
-  }
-
-  private function &GetRewriteObj()
-  {
-    if (empty($this->rewrite))
-      $this->rewrite = new rewrite();
-
-    return $this->rewrite;
-  }
-
-  public function __Call($name, $arguments)
-  {
-    $this->FilterFriends();
-
-    return call_user_method_array([$this, $name], $arguments);
-  }
-
-  private function FilterFriends()
-  {
-    debug_print_backtrace();
-  }
-}
+require_once('phony_implementation.php');
 
 class phony
 {
