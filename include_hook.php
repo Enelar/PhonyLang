@@ -1,6 +1,6 @@
 <?php namespace phony;
 
-include('exception.php');
+require_once('exception.php');
 
 function phony_include($filename)
 {
@@ -18,7 +18,7 @@ function phony_include($filename)
     if (!file_exists($file))
       continue;
 
-    $content = file_get_contents($file);
+    $content = phony::Rewrite($file);
 
     eval($content);
   }
