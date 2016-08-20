@@ -6,7 +6,7 @@ class phony_extend
 
   protected function add($name, $is_public, $fn_command)
   {
-    if (!empty($this->methods[$name])
+    if (!empty($this->methods[$name]))
       throw Exception("Method already exists. Refuse to override");
 
     $this->methods[$name] = $fn_command;

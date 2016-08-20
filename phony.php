@@ -4,22 +4,26 @@ require_once('phony_implementation.php');
 
 class phony
 {
-  protected $phony;
+  protected static $phony;
 
-  protected function __get_phony()
+  protected static function __get_phony()
   {
-    if (empty($this->phony))
-      $this->phony = new phony_implementation();
+    if (empty(self::$phony))
+      self::$phony = new phony_implementation();
 
-    return $this->phony;
+    return self::$phony;
   }
 
   public static function __callStatic($name, $arguments)
   {
-    return call_user_method_array([$this->phony, $name], $arguments);
+    return call_user_func_array([self::__get_phony()  , $name], $arguments);
   }
 }
 
+function phony()
+{
+  return new phony();
+}
 
 require_once('include_hook.php');
 require_once('rewrite.php');
