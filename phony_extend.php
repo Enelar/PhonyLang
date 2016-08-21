@@ -63,15 +63,17 @@ class phony_extend
       $this->FilterFriends();
 
     if (!empty($var['set']))
-      if (!$this->ExecuteHooks($var['set'], [$value, $var['value']]))
+    {
+      $args = [$value, &$var['value']];
+      if (!$this->ExecuteHooks($var['set'], $args))
         throw new Exception("Write in $name denied");
+    }
 
     return $var['value'] = $value;
   }
 
   public function __get($name)
   {
-    var_dump($name);
     $var = &$this->variable($name);
 
     if (!$var['public'])
@@ -80,6 +82,9 @@ class phony_extend
     if (!empty($var['get']))
       if (!$this->ExecuteHooks($var['get'], [$var['value']]))
         throw new Exception("Read from $name denied");
+
+    if (!isset($var['value']))
+      throw new Exception("Reading uninitialized value");
 
     return $var['value'];
   }
