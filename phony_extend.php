@@ -111,6 +111,43 @@ class phony_extend
 
   protected function FilterFriends()
   {
-    debug_print_backtrace();
+    $callstack = debug_backtrace();
+
+    $stack_distance = 0;
+
+    foreach ($callstack as $stackframe)
+    {
+      $stack_distance++;
+
+      if (in_array($stackframe['function'],
+          [
+            'call_user_func_array',
+            '__get',
+            '__set',
+            'phony\{closure}',
+          ] ))
+        continue;
+
+      if (!isset($method)
+        && $stack_distance > 1
+        && strpos($stackframe['function'], '__Call') === false)
+        $method = $stackframe['function'];
+
+      if (isset($stackframe['class'])
+        && in_array($stackframe['class'],
+          [
+            'phony\phony_implementation',
+            'phony\phony_extend',
+          ]))
+        continue;
+
+      break;
+    }
+
+    if (isset($stackframe['file'])
+      && dirname($stackframe['file']) == __DIR__)
+      return true;
+
+    throw new Exception("Calling private phony::{$method} forbidden");
   }
 }
