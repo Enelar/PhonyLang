@@ -63,3 +63,21 @@ class rewrite
     return $content;
   }
 }
+
+
+phony::add_variable('rewrite', false,
+[
+  'value' => new rewrite(),
+]);
+
+phony::add('Rewrite', true, function ($file)
+{
+  $rewrite = $this->GetRewriteObj();
+
+  return $rewrite->Tranverse($file);
+});
+
+phony::add('GetRewriteObj', false, function &()
+{
+  return phony()->rewrite;
+});
