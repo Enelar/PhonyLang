@@ -13,6 +13,7 @@ class rewrite
       throw Exception("Device $device already registered");
 
     $this->devices[] = $device;
+    $this->drivers[$device] = [];
   }
 
   /*
@@ -24,10 +25,10 @@ class rewrite
   {
     $driver_obj = $this->ConstructDriverObj($driver_name, $driver);
 
-    if (empty($this->drivers[$device]))
-      $this->drivers[$device] = [$driver_obj];
-    else
-      $this->drivers[$device][] = $driver_obj;
+    if (!in_array($device, $this->devices))
+      throw new Exception("Device is unsupported");
+
+    $this->drivers[$device][] = $driver_obj;
   }
 
   private function ConstructDriverObj($driver_name, $driver)
@@ -84,7 +85,7 @@ phony::add_variable('rewrite', false,
 
 phony::add('Rewrite', true, function ($file)
 {
-  $rewrite = $this->GetRewriteObj();
+  $rewrite = phony::GetRewriteObj();
 
   return $rewrite->Tranverse($file);
 });

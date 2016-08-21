@@ -5,13 +5,18 @@ require_once('exception.php');
 phony::add_variable ('included_files', false,
 [
   'type' => 'variable',
-  'init' => [],
+  'value' => [],
+  'set' => function($new, &$old)
+  {
+    $old[] = $new;
+    return true;
+  }
 ]);
 
 function register_included_file($filename)
 {
   if (!is_file_included($filename))
-    phony()->included_files[] = $filename;
+    phony()->included_files = $filename;
 }
 
 function is_file_included($filename)
@@ -26,9 +31,7 @@ function is_file_included($filename)
 
 function phony_include($filename, $before_include)
 {
-  // We hook only .phony extensions
-  if (strrpos($filename, ".phony") === false)
-    return include($filename);
+  var_dump("INCLUDING $filename");
 
   $include_path = get_include_path();
   $include_folders = explode(":", $include_path);
