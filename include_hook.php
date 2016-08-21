@@ -2,7 +2,7 @@
 
 require_once('exception.php');
 
-phony::add_variable('included_files', false,
+phony::add_variable ('included_files', false,
 [
   'type' => 'variable',
   'init' => [],
@@ -87,3 +87,46 @@ phony::add('require_once', true, function($filename)
   if (!$result)
     throw Exception("Unable to require {$filename}");
 });
+
+phony::GetRewriteObj()->RegisterDriver('source.php', 'include',
+  function ($filename, $content, &$new)
+  {
+    $dictionary =
+    [
+      'include' => 'phony::__include',
+      'include_once' => 'phony::__include_once',
+      'require' => 'phony::__require',
+      'require_once' => 'phony::__require_once',
+    ];
+
+    $new = str_replace(
+      array_keys($dictionary)
+      , array_values($dictionary)
+      , $content);
+
+    return true;
+  });
+
+phony::GetRewriteObj()->RegisterDriver('source.phony', 'include',
+  function ($filename, $content, &$new)
+  {
+    // TODO: Unlike php we shouldn't treat it as keywords
+    // Replace only when it outside class mention
+
+    $dictionary =
+    [
+      'include' => 'phony::__include',
+      'include_once' => 'phony::__include_once',
+      'require' => 'phony::__require',
+      'require_once' => 'phony::__require_once',
+    ];
+
+    $new = str_replace(
+      array_keys($dictionary)
+      , array_values($dictionary)
+      , $content);
+
+    return true;
+
+    return true;
+  });

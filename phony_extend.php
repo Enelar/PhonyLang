@@ -22,7 +22,10 @@ class phony_extend
   public function __Call($name, $arguments)
   {
     if (empty($this->methods[$name]))
+    {
+      var_dump(array_keys($this->methods));
       throw new Exception("phony::{$name} not defined");
+    }
 
     $method = $this->methods[$name];
     $func = $method['func'];
@@ -54,7 +57,7 @@ class phony_extend
 
   public function __set($name, $value)
   {
-    $var = $this->variable($name);
+    $var = &$this->variable($name);
 
     if (!$var['public'])
       $this->FilterFriends();
@@ -68,7 +71,8 @@ class phony_extend
 
   public function __get($name)
   {
-    $var = $this->variable($name);
+    var_dump($name);
+    $var = &$this->variable($name);
 
     if (!$var['public'])
       $this->FilterFriends();

@@ -17,7 +17,7 @@ class rewrite
 
   /*
     Driver callback:
-      ($content, &$result)
+      ($scope, $target, &$result)
       If driver returns false it treat like abort signal
    */
   public function RegisterDriver($device, $driver_name, $driver)
@@ -48,7 +48,7 @@ class rewrite
     {
       try
       {
-        $result = $driver['func']($content, $new_version);
+        $result = $driver['func']($filename, $content, $new_version);
       } catch (Exception $e)
       {
         throw Rethrow("Driver {$driver['name']} throw an exception");
@@ -79,5 +79,12 @@ phony::add('Rewrite', true, function ($file)
 
 phony::add('GetRewriteObj', false, function &()
 {
-  return phony()->rewrite;
+  // TODO: Make reference object
+
+  $ret = &phony()->rewrite;
+  return $ret;
 });
+
+phony::GetRewriteObj()->RegisterDevice('source');
+phony::GetRewriteObj()->RegisterDevice('source.php');
+phony::GetRewriteObj()->RegisterDevice('source.phony');

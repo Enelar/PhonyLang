@@ -6,8 +6,18 @@ class phony_implementation extends phony_extend
 {
   private $extend;
 
-  public function __Call($name, $arguments)
+  private function __unescape_methodname($name)
   {
+    if (substr($name, 0, 2) == "__")
+      return substr($name, 2);
+
+    return $name;
+  }
+
+  public function __Call($method, $arguments)
+  {
+    $name = $this->__unescape_methodname($method);
+
     if (method_exists($this, $name))
     {
       $this->FilterFriends();
