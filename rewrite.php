@@ -44,11 +44,22 @@ class rewrite
     $content = file_get_contents($filename);
 
     // only whole document rewrite currently supported
-    foreach ($this->drivers['source'] as $driver)
+    $content = $this->RunDrivers('source', $filename, $content);
+    if (strrpos($filename, '.php'))
+      $content = $this->RunDrivers('source.php', $filename, $content);
+    if (strrpos($filename, '.phony'))
+      $content = $this->RunDrivers('source.phony', $filename, $content);
+
+    return $content;
+  }
+
+  private function RunDrivers($device, $scope, $content)
+  {
+    foreach ($this->drivers[$device] as $driver)
     {
       try
       {
-        $result = $driver['func']($filename, $content, $new_version);
+        $result = $driver['func']($scope, $content, $new_version);
       } catch (Exception $e)
       {
         throw Rethrow("Driver {$driver['name']} throw an exception");
@@ -62,6 +73,7 @@ class rewrite
 
     return $content;
   }
+
 }
 
 
