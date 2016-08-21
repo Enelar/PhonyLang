@@ -69,7 +69,7 @@ class phony_extend
         throw new Exception("Write in $name denied");
     }
 
-    return $var['value'] = $value;
+    return $var['value'];
   }
 
   public function __get($name)

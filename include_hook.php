@@ -1,6 +1,7 @@
 <?php namespace phony;
 
 require_once('exception.php');
+require_once('php-sandbox/PHPValidator.php');
 
 phony::add_variable ('included_files', false,
 [
@@ -9,6 +10,7 @@ phony::add_variable ('included_files', false,
   'set' => function($new, &$old)
   {
     $old[] = $new;
+
     return true;
   }
 ]);
@@ -52,7 +54,13 @@ function phony_include($filename, $before_include)
 
     $content = phony::Rewrite($file);
 
+    $error = \Ext_Sandbox_PHPValidator::php_syntax_error($content);
+
+    if ($error !== false)
+      throw new Exception("Systax error in $file: {$error[0]} at {$error[1]}");
+
     eval($content);
+
     return true;
   }
 
@@ -96,40 +104,17 @@ phony::GetRewriteObj()->RegisterDriver('source.php', 'include',
   {
     $dictionary =
     [
-      'include' => 'phony::__include',
-      'include_once' => 'phony::__include_once',
-      'require' => 'phony::__require',
-      'require_once' => 'phony::__require_once',
+      '/<\?php/' => '',
+      '/\binclude_once\b/' => 'phony\phony::__include_once',
+      '/\brequire_once\b/' => 'phony\phony::__require_once',
+      '/\binclude\b/' => 'phony\phony::__include',
+      '/\brequire\b/' => 'phony\phony::__require',
     ];
 
-    $new = str_replace(
-      array_keys($dictionary)
-      , array_values($dictionary)
-      , $content);
-
-    return true;
-  });
-
-phony::GetRewriteObj()->RegisterDriver('source.phony', 'include',
-  function ($filename, $content, &$new)
-  {
-    // TODO: Unlike php we shouldn't treat it as keywords
-    // Replace only when it outside class mention
-
-    $dictionary =
-    [
-      'include' => 'phony::__include',
-      'include_once' => 'phony::__include_once',
-      'require' => 'phony::__require',
-      'require_once' => 'phony::__require_once',
-    ];
-
-    $new = str_replace(
-      array_keys($dictionary)
-      , array_values($dictionary)
-      , $content);
-
-    return true;
+    $new = preg_replace(
+        array_keys($dictionary)
+        , array_values($dictionary)
+        , $content);
 
     return true;
   });

@@ -16,7 +16,6 @@ class phony
 
   public static function __callStatic($name, $arguments)
   {
-    var_dump("calling $name");
     return call_user_func_array([self::__get_phony(), $name], $arguments);
   }
 }
