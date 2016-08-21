@@ -3,13 +3,20 @@
 class phony_extend
 {
   private $methods = [];
+  private $variables = [];
 
   protected function add($name, $is_public, $fn_command)
   {
     if (!empty($this->methods[$name]))
       throw new Exception("Method already exists. Refuse to override");
 
-    $this->methods[$name] = $fn_command;
+    $method_described =
+    [
+      'public' => $is_public,
+      'func' => $fn_command,
+    ];
+
+    $this->methods[$name] = $method_described;
   }
 
   public function __Call($name, $arguments)
@@ -18,11 +25,84 @@ class phony_extend
       throw new Exception("phony::{$name} not defined");
 
     $method = $this->methods[$name];
+    $func = $method['func'];
 
-    if (is_string($method))
-      return call_user_func_array($method, $arguments);
+    if (!$method['public'])
+      $this->FilterFriends();
 
-    throw new Exception("phony_extend support only string method. todo");
+    if (is_string($func))
+      return call_user_func_array($func, $arguments);
+
+    if (is_callable($func))
+      return call_user_func_array($func, $arguments);
+
+    throw new Exception("phony_extend unrecognizable method type {$name}");
+  }
+
+  protected function add_variable($name, $is_public, $params = [])
+  {
+    if (!empty($this->variables[$name]))
+      throw new Exception("Variable already exists. Refuse to override");
+
+    if (!is_array($params))
+      throw new Exception("Variable params should be array");
+
+    $params['public'] = $is_public;
+
+    $this->variables[$name] = $params;
+  }
+
+  public function __set($name, $value)
+  {
+    $var = $this->variable($name);
+
+    if (!$var['public'])
+      $this->FilterFriends();
+
+    if (!empty($var['set']))
+      if (!$this->ExecuteHooks($var['set'], [$value, $var['value']]))
+        throw new Exception("Write in $name denied");
+
+    return $var['value'] = $value;
+  }
+
+  public function __get($name)
+  {
+    $var = $this->variable($name);
+
+    if (!$var['public'])
+      $this->FilterFriends();
+
+    if (!empty($var['get']))
+      if (!$this->ExecuteHooks($var['get'], [$var['value']]))
+        throw new Exception("Read from $name denied");
+
+    return $var['value'];
+  }
+
+  private function &variable($name)
+  {
+    if (empty($this->variables[$name]))
+      throw new Exception("Variable $name is undefined");
+    return $this->variables[$name];
+  }
+
+  private function ExecuteHooks($hooks, &$arguments)
+  {
+    if (is_callable($hooks))
+      $hooks = [$hooks];
+
+    foreach ($hooks as $hook)
+    {
+      if (!is_callable($hook))
+        throw new Exception("Hook is not callable!");
+
+      $res = call_user_func_array($hook, $arguments);
+      if (!$res)
+        return false;
+    }
+
+    return true;
   }
 
   protected function FilterFriends()

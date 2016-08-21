@@ -2,7 +2,7 @@
 
 require_once('exception.php');
 
-phony::add('included_files', false,
+phony::add_variable('included_files', false,
 [
   'type' => 'variable',
   'init' => [],
